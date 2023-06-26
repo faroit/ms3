@@ -346,12 +346,12 @@ def review_cmd(args,
     for warning in accumulated_warnings:
         warning_lines = warning.splitlines()
         first_line = warning_lines[0]
-        match = re.search(r"ms3\.Parse\.\S+\.\S+", first_line)
+        match = re.search(r"(ms3\.Parse\..+) --", first_line)
         if match is None:
             logger.warning(f"This warning contains no ms3 logger name, skipping: {warning}")
             continue
         warning_lines[0] = first_line[:match.end()]  # cut off the warning's header everything following the logger name because paths to source code are system-dependent
-        pieceID = logger2pieceID[match.group(0)]
+        pieceID = logger2pieceID[match.group(1)]
         piece2warnings[pieceID].append('\n'.join(warning_lines))
 
 
@@ -667,7 +667,7 @@ In particular, check DCML harmony labels for syntactic correctness.""", parents=
                               help="Pass -c if you want the _reviewed file to display removed labels in red and added labels in green, compared to the version currently "
                                    "represented in the present TSV files, if any. If instead you want a comparison with the TSV files from another Git commit, additionally "
                                    "pass its specifier, e.g. 'HEAD~3', <branch-name>, <commit SHA> etc.")
-    review_parser.add_argument('--threshold', default=0.6,
+    review_parser.add_argument('--threshold', default=0.6, type=float,
                                   help="Harmony segments where the ratio of non-chord tones vs. chord tones lies above this threshold "
                                        "will be printed in a warning and will cause the check to fail if the --fail flag is set. Defaults to 0.6 (3:2).")
     review_parser.set_defaults(func=review_cmd)
